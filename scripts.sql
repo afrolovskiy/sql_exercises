@@ -105,7 +105,64 @@ FROM Movie
 ORDER BY record
 LIMIT 4;
 
+/*13) Выберите названия всех фильмов, которым не поставил оценку Chris Jackson*/
+SELECT DISTINCT title
+FROM Rating ra
+JOIN Reviewer re ON ra.rID = re.rID
+JOIN Movie m ON ra.mID = m.mID
+WHERE re.name != 'Chris Jackson';
 
+/*14) Для всех пар экспертов, если оба оценили один и тот же фильм, выбрать имена
+  обоих. Устранить дубликаты, проверить отсутствие пар самих с собой и включать 
+  каждую пару только 1 раз. Выбрать имена в паре в алфавитном порядке.*/
+SELECT DISTINCT r1.name, r2.name
+FROM (
+        SELECT ra.rID, name, mID
+        FROM Rating ra
+        JOIN Reviewer re ON ra.rID = re.rID
+) as r1
+JOIN  (
+        SELECT ra.rID, name, mID
+        FROM Rating ra
+        JOIN Reviewer re ON ra.rID = re.rID
+) as r2 ON r1.mID = r2.mID
+WHERE r1.name < r2.name;
 
+/*15) Для каждой минимальной оценки выбрать имя эксперта, название фильма,
+  количество звезд*/
+SELECT name, title, stars
+FROM Rating ra
+JOIN Reviewer re ON ra.rID = re.rID
+JOIN Movie m ON ra.mID = m.mID
+WHERE ra.stars = (
+	SELECT min(stars)
+	FROM Rating
+);
 
+/*16) Список названий фильмов и средний рейтинг, от самого низкого до высокого.
+  Если 2 и более фильмов имеют одинаковый средний балл, перечислить их в   
+  алфавитном порядке*/
+SELECT avg(stars) as avg_stars, title
+FROM Rating r
+JOIN Movie m ON r.mID = m.mID
+GROUP BY m.mID
+ORDER BY avg_stars DESC, title;
 
+/*17) Найти имена всех экспертов, которые поставили 3 и более оценки*/
+SELECT re.name
+FROM Rating r
+JOIN Reviewer re ON r.rID = re.rID
+GROUP BY r.rID
+HAVING count(r.rID) >= 3;
+
+/*18) Некоторые режиссеры сняли более, чем 1 фильм. Для всех таких режиссеров
+  выбрать названия всех фильмов режиссера. его имя. Сортировка по имени режиссера.*/
+SELECT title, director
+FROM Movie
+WHERE director IN (
+	SELECT director
+	FROM Movie
+	GROUP BY director
+	HAVING count(director) > 1
+)
+ORDER BY director;

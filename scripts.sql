@@ -66,6 +66,44 @@ JOIN Movie m ON r.mID = m.mID
 GROUP BY r.mID
 ORDER BY diff_stars DESC, title;
 
+/*9) Найти разницу между средней оценкой фильмов. выпущенных до 1980 года, и 
+  средней оценкой фильмов, выпущенных после 1980 года*/
+SELECT max(tmp2.stars) - min(tmp2.stars) as diff
+FROM (
+        SELECT avg(tmp1.stars) as stars
+        FROM (
+	        SELECT avg(stars) as stars, mID
+	        FROM Rating
+	        GROUP BY mID
+        ) AS tmp1
+        JOIN Movie m ON tmp1.mID = m.mID
+        GROUP BY m.year < 1980
+) as tmp2;
+
+/*10) Найти имена всех экспертов, кто оценил "Gone with the Wind"*/
+SELECT DISTINCT name
+FROM Rating ra
+JOIN Reviewer re ON ra.rID = re.rID
+JOIN Movie m ON ra.mID = m.mID
+WHERE m.title = "Gone with the Wind";
+
+/*11) Для каждой оценки, где эксперт тот же человек что и режиссер, выбрать имя, 
+  название фильма и оценки*/
+SELECT name, title, stars
+FROM Rating ra
+JOIN Reviewer re ON ra.rID = re.rID
+JOIN Movie m ON ra.mID = m.mID
+WHERE m.director = re.name;
+
+/*12) Выберите всех экспертов и названия фильмов в едином списке в алфавитном
+  порядке (4 первых записи)*/
+SELECT name as record
+FROM Reviewer
+UNION
+SELECT title as record
+FROM Movie
+ORDER BY record
+LIMIT 4;
 
 
 
